@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
 <title>OGR Store</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
-<script src="https://unpkg.com/lucide@latest"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -35,7 +34,31 @@ body{
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 .serif{font-family:var(--font-display)}
-i[data-lucide]{width:1em;height:1em;stroke-width:1.6;display:inline-block;vertical-align:-.125em}
+
+/* SVG-иконки (инлайн) */
+svg[aria-hidden]{display:inline-block;vertical-align:-.15em;width:1em;height:1em;flex-shrink:0}
+.ic-fill{fill:var(--gold-2);stroke:var(--gold-2)}
+.tab svg{width:23px;height:23px;display:block;margin:0 auto}
+.tab.on svg{stroke:var(--gold-2)}
+.brand .mark svg{width:18px;height:18px;stroke:var(--gold-2)}
+.top-shield svg{width:13px;height:13px;stroke:var(--gold-2)}
+.cat-tile .ic svg{width:22px;height:22px;stroke:var(--gold-2)}
+.trust-row .t svg{width:20px;height:20px;stroke:var(--gold-2);margin-bottom:6px}
+.about-item>svg{width:19px;height:19px;stroke:var(--gold-2);flex-shrink:0;margin-top:1px}
+.hero .trust-line svg{width:14px;height:14px;stroke:var(--gold-2)}
+.hero .logo-frame svg{width:46px;height:46px;stroke:var(--gold-1);stroke-width:1.2}
+.btn svg{width:18px;height:18px}
+.btn-gold svg{stroke:#241c08}
+.icon-btn svg{width:21px;height:21px;stroke:var(--gold-2)}
+.icon-btn.on svg{stroke:var(--gold-2);fill:rgba(201,162,75,.25)}
+.card .fav svg{width:16px;height:16px;stroke:var(--gold-2)}
+.card .fav.on svg{fill:var(--gold-2);stroke:var(--gold-2)}
+.sec-head .link svg{width:14px;height:14px}
+.badge.hit svg{width:11px;height:11px;stroke:#241c08}
+.empty svg{width:54px;height:54px;stroke:var(--muted-2);display:block;margin:0 auto 16px}
+.search-wrap .si svg{width:18px;height:18px;stroke:var(--muted)}
+.del svg{width:12px;height:12px;stroke:var(--muted-2)}
+
 
 /* ---------- Каркас ---------- */
 #app{position:relative;z-index:1;max-width:var(--maxw);margin:0 auto;min-height:100vh}
@@ -269,16 +292,56 @@ i[data-lucide]{width:1em;height:1em;stroke-width:1.6;display:inline-block;vertic
 <div id="app">
   <div id="topbar">
     <div class="brand" onclick="App.tab('home')">
-      <div class="mark"><i data-lucide="smartphone"></i></div>
+      <!-- logo-slot: замените на <img src="assets/logo.png"> -->
+      <div class="mark" id="brand-mark"></div>
       <div class="name">OgrStore<small>Apple Premium</small></div>
     </div>
-    <div class="top-shield" onclick="App.go('about')"><i data-lucide="shield-check"></i>Гарантии</div>
+    <div class="top-shield" onclick="App.go('about')" id="topbar-shield">Гарантии</div>
   </div>
   <div id="screen"></div>
 </div>
 <div id="tabbar"></div>
 
 <script>
+
+/* ======================= ИКОНКИ (инлайн SVG) ======================= */
+// Все иконки вшиты — не зависят от CDN, работают в Telegram без интернета.
+const SVG = {
+  'smartphone':    '<rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/>',
+  'laptop':        '<rect x="3" y="4" width="18" height="12" rx="2"/><path d="M1 20h22l-2-4H3z"/>',
+  'tablet':        '<rect x="4" y="2" width="16" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/>',
+  'gamepad-2':     '<path d="M6 11h4M8 9v4M15 12h.01M18 10h.01"/><path d="M17.32 5H6.68a4 4 0 0 0-3.978 3.59c-.006.052-.01.101-.017.152C2.604 9.416 2 14.456 2 16a3 3 0 0 0 3 3c1 0 1.5-.5 2-1l1.414-1.414A2 2 0 0 1 9.828 16h4.344a2 2 0 0 1 1.414.586L17 18c.5.5 1 1 2 1a3 3 0 0 0 3-3c0-1.545-.604-6.584-.685-7.258-.007-.05-.011-.1-.017-.151A4 4 0 0 0 17.32 5z"/>',
+  'watch':         '<circle cx="12" cy="12" r="6"/><path d="M12 10v2l1.5 1.5"/><path d="M16.51 17.35l-.35 3.83a2 2 0 0 1-2 1.82H9.83a2 2 0 0 1-2-1.82l-.35-3.83m.01-10.7.35-3.83A2 2 0 0 1 9.83 1h4.35a2 2 0 0 1 2 1.82l.35 3.83"/>',
+  'headphones':    '<path d="M3 14h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-7a9 9 0 0 1 18 0v7a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3"/>',
+  'shield-check':  '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/>',
+  'badge-check':   '<path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76z"/><path d="m9 12 2 2 4-4"/>',
+  'truck':         '<path d="M5 17H3a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11a2 2 0 0 1 2 2v3"/><rect width="7" height="7" x="14" y="10" rx="1"/><path d="M5 17a2 2 0 1 0 4 0 2 2 0 0 0-4 0M16 17a2 2 0 1 0 4 0 2 2 0 0 0-4 0"/>',
+  'chevron-right': '<path d="m9 18 6-6-6-6"/>',
+  'heart':         '<path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7z"/>',
+  'shopping-bag':  '<path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" x2="21" y1="6" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/>',
+  'layout-grid':   '<rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/>',
+  'search':        '<circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>',
+  'search-x':      '<path d="m13.5 8.5-5 5m0-5 5 5"/><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>',
+  'arrow-right':   '<path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>',
+  'check':         '<path d="M20 6 9 17l-5-5"/>',
+  'eye':           '<path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/>',
+  'trash-2':       '<path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/>',
+  'flame':         '<path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/>',
+};
+// ic(name, cls?) → строка SVG
+function ic(name, cls){
+  const d = SVG[name];
+  if(!d) return '';
+  const c = cls ? ` class="${cls}"` : '';
+  return `<svg${c} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
+}
+// ic_fill — для сердечка/корзины когда нужен fill
+function ic_f(name){
+  const d = SVG[name];
+  if(!d) return '';
+  return `<svg class="ic-fill" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
+}
+
 /* ======================= ДАННЫЕ ======================= */
 const PHOTO_BASE = "assets/products/";
 const CATEGORIES = [
@@ -291,33 +354,33 @@ const CATEGORIES = [
   { key:"acc",     title:"Аксессуары",  sub:"AirPods · зарядки", icon:"headphones" },
 ];
 const PRODUCTS = [
-  {id:"ip15-128",cat:"iphone",model:"iPhone 15",variant:"128 GB",color:"Чёрный",price:64990,old:0,stock:true,hit:false,photo:""},
-  {id:"ip15-256",cat:"iphone",model:"iPhone 15",variant:"256 GB",color:"Розовый",price:72990,old:0,stock:true,hit:false,photo:""},
-  {id:"ip16-128",cat:"iphone",model:"iPhone 16",variant:"128 GB",color:"Ультрамарин",price:79990,old:0,stock:true,hit:false,photo:""},
-  {id:"ip16-256",cat:"iphone",model:"iPhone 16",variant:"256 GB",color:"Чёрный",price:88990,old:0,stock:true,hit:false,photo:""},
-  {id:"ip16p-256",cat:"iphone",model:"iPhone 16 Pro",variant:"256 GB",color:"Натуральный титан",price:109990,old:119990,stock:true,hit:true,photo:""},
-  {id:"ip16p-512",cat:"iphone",model:"iPhone 16 Pro",variant:"512 GB",color:"Чёрный титан",price:124990,old:0,stock:true,hit:false,photo:""},
-  {id:"ip16pm-256",cat:"iphone",model:"iPhone 16 Pro Max",variant:"256 GB",color:"Пустынный титан",price:129990,old:0,stock:true,hit:true,photo:""},
-  {id:"ip16pm-1tb",cat:"iphone",model:"iPhone 16 Pro Max",variant:"1 TB",color:"Натуральный титан",price:159990,old:0,stock:false,hit:false,photo:""},
-  {id:"mba13-256",cat:"macbook",model:"MacBook Air 13 M3",variant:"8/256 GB",color:"Тёмная ночь",price:99990,old:0,stock:true,hit:false,photo:""},
-  {id:"mba13-512",cat:"macbook",model:"MacBook Air 13 M3",variant:"16/512 GB",color:"Серебристый",price:129990,old:0,stock:true,hit:false,photo:""},
-  {id:"mbp14-512",cat:"macbook",model:"MacBook Pro 14 M4",variant:"16/512 GB",color:"Космос",price:184990,old:199990,stock:true,hit:true,photo:""},
-  {id:"mbp14-1tb",cat:"macbook",model:"MacBook Pro 14 M4",variant:"24/1 TB",color:"Серебристый",price:229990,old:0,stock:false,hit:false,photo:""},
-  {id:"ipad-air-128",cat:"ipad",model:"iPad Air 11 M2",variant:"128 GB",color:"Серый космос",price:64990,old:0,stock:true,hit:false,photo:""},
-  {id:"ipad-air-256",cat:"ipad",model:"iPad Air 11 M2",variant:"256 GB",color:"Сияющая звезда",price:74990,old:0,stock:true,hit:false,photo:""},
-  {id:"ipad-pro-256",cat:"ipad",model:"iPad Pro 11 M4",variant:"256 GB",color:"Серебристый",price:109990,old:0,stock:true,hit:false,photo:""},
-  {id:"s24-256",cat:"samsung",model:"Galaxy S24",variant:"256 GB",color:"Onyx Black",price:69990,old:0,stock:true,hit:false,photo:""},
-  {id:"s24u-256",cat:"samsung",model:"Galaxy S24 Ultra",variant:"256 GB",color:"Titanium Gray",price:109990,old:0,stock:true,hit:true,photo:""},
-  {id:"s24u-512",cat:"samsung",model:"Galaxy S24 Ultra",variant:"512 GB",color:"Titanium Black",price:124990,old:0,stock:true,hit:false,photo:""},
-  {id:"ps5-slim",cat:"ps5",model:"PlayStation 5 Slim",variant:"1 TB",color:"Disc Edition",price:64990,old:0,stock:true,hit:true,photo:""},
-  {id:"ps5-pro",cat:"ps5",model:"PlayStation 5 Pro",variant:"2 TB",color:"Standard",price:109990,old:0,stock:false,hit:false,photo:""},
-  {id:"aw10-42",cat:"watch",model:"Apple Watch S10",variant:"42 mm",color:"Jet Black",price:49990,old:0,stock:true,hit:false,photo:""},
-  {id:"aw10-46",cat:"watch",model:"Apple Watch S10",variant:"46 mm",color:"Silver",price:54990,old:0,stock:true,hit:false,photo:""},
-  {id:"awu2-49",cat:"watch",model:"Apple Watch Ultra 2",variant:"49 mm",color:"Titanium",price:89990,old:0,stock:true,hit:false,photo:""},
-  {id:"airpods-pro2",cat:"acc",model:"AirPods Pro 2",variant:"USB-C",color:"White",price:21990,old:0,stock:true,hit:true,photo:""},
-  {id:"charger-20w",cat:"acc",model:"Apple 20W USB-C",variant:"",color:"Адаптер",price:2990,old:0,stock:true,hit:false,photo:""},
-  {id:"magsafe",cat:"acc",model:"MagSafe Charger",variant:"",color:"Беспроводная",price:4990,old:0,stock:true,hit:false,photo:""},
-  {id:"case-16pro",cat:"acc",model:"Чехол iPhone 16 Pro",variant:"",color:"Silicone Black",price:3490,old:0,stock:true,hit:false,photo:""},
+  {id:"ip15-128",cat:"iphone",model:"iPhone 15",variant:"128 GB",color:"Чёрный",price:64990,old:0,stock:true,hit:false,photo:"assets/products/ip15-128.png"},
+  {id:"ip15-256",cat:"iphone",model:"iPhone 15",variant:"256 GB",color:"Розовый",price:72990,old:0,stock:true,hit:false,photo:"assets/products/ip15-256.png"},
+  {id:"ip16-128",cat:"iphone",model:"iPhone 16",variant:"128 GB",color:"Ультрамарин",price:79990,old:0,stock:true,hit:false,photo:"assets/products/ip16-128.png"},
+  {id:"ip16-256",cat:"iphone",model:"iPhone 16",variant:"256 GB",color:"Чёрный",price:88990,old:0,stock:true,hit:false,photo:"assets/products/ip16-256.png"},
+  {id:"ip16p-256",cat:"iphone",model:"iPhone 16 Pro",variant:"256 GB",color:"Натуральный титан",price:109990,old:119990,stock:true,hit:true,photo:"assets/products/ip16p-256.png"},
+  {id:"ip16p-512",cat:"iphone",model:"iPhone 16 Pro",variant:"512 GB",color:"Чёрный титан",price:124990,old:0,stock:true,hit:false,photo:"assets/products/ip16p-512.png"},
+  {id:"ip16pm-256",cat:"iphone",model:"iPhone 16 Pro Max",variant:"256 GB",color:"Пустынный титан",price:129990,old:0,stock:true,hit:true,photo:"assets/products/ip16pm-256.png"},
+  {id:"ip16pm-1tb",cat:"iphone",model:"iPhone 16 Pro Max",variant:"1 TB",color:"Натуральный титан",price:159990,old:0,stock:false,hit:false,photo:"assets/products/ip16pm-1tb.png"},
+  {id:"mba13-256",cat:"macbook",model:"MacBook Air 13 M3",variant:"8/256 GB",color:"Тёмная ночь",price:99990,old:0,stock:true,hit:false,photo:"assets/products/mba13-256.png"},
+  {id:"mba13-512",cat:"macbook",model:"MacBook Air 13 M3",variant:"16/512 GB",color:"Серебристый",price:129990,old:0,stock:true,hit:false,photo:"assets/products/mba13-512.png"},
+  {id:"mbp14-512",cat:"macbook",model:"MacBook Pro 14 M4",variant:"16/512 GB",color:"Космос",price:184990,old:199990,stock:true,hit:true,photo:"assets/products/mbp14-512.png"},
+  {id:"mbp14-1tb",cat:"macbook",model:"MacBook Pro 14 M4",variant:"24/1 TB",color:"Серебристый",price:229990,old:0,stock:false,hit:false,photo:"assets/products/mbp14-1tb.png"},
+  {id:"ipad-air-128",cat:"ipad",model:"iPad Air 11 M2",variant:"128 GB",color:"Серый космос",price:64990,old:0,stock:true,hit:false,photo:"assets/products/ipad-air-128.png"},
+  {id:"ipad-air-256",cat:"ipad",model:"iPad Air 11 M2",variant:"256 GB",color:"Сияющая звезда",price:74990,old:0,stock:true,hit:false,photo:"assets/products/ipad-air-256.png"},
+  {id:"ipad-pro-256",cat:"ipad",model:"iPad Pro 11 M4",variant:"256 GB",color:"Серебристый",price:109990,old:0,stock:true,hit:false,photo:"assets/products/ipad-pro-256.png"},
+  {id:"s24-256",cat:"samsung",model:"Galaxy S24",variant:"256 GB",color:"Onyx Black",price:69990,old:0,stock:true,hit:false,photo:"assets/products/s24-256.png"},
+  {id:"s24u-256",cat:"samsung",model:"Galaxy S24 Ultra",variant:"256 GB",color:"Titanium Gray",price:109990,old:0,stock:true,hit:true,photo:"assets/products/s24u-256.png"},
+  {id:"s24u-512",cat:"samsung",model:"Galaxy S24 Ultra",variant:"512 GB",color:"Titanium Black",price:124990,old:0,stock:true,hit:false,photo:"assets/products/s24u-512.png"},
+  {id:"ps5-slim",cat:"ps5",model:"PlayStation 5 Slim",variant:"1 TB",color:"Disc Edition",price:64990,old:0,stock:true,hit:true,photo:"assets/products/ps5-slim.png"},
+  {id:"ps5-pro",cat:"ps5",model:"PlayStation 5 Pro",variant:"2 TB",color:"Standard",price:109990,old:0,stock:false,hit:false,photo:"assets/products/ps5-pro.png"},
+  {id:"aw10-42",cat:"watch",model:"Apple Watch S10",variant:"42 mm",color:"Jet Black",price:49990,old:0,stock:true,hit:false,photo:"assets/products/aw10-42.png"},
+  {id:"aw10-46",cat:"watch",model:"Apple Watch S10",variant:"46 mm",color:"Silver",price:54990,old:0,stock:true,hit:false,photo:"assets/products/aw10-46.png"},
+  {id:"awu2-49",cat:"watch",model:"Apple Watch Ultra 2",variant:"49 mm",color:"Titanium",price:89990,old:0,stock:true,hit:false,photo:"assets/products/awu2-49.png"},
+  {id:"airpods-pro2",cat:"acc",model:"AirPods Pro 2",variant:"USB-C",color:"White",price:21990,old:0,stock:true,hit:true,photo:"assets/products/airpods-pro2.png"},
+  {id:"charger-20w",cat:"acc",model:"Apple 20W USB-C",variant:"",color:"Адаптер",price:2990,old:0,stock:true,hit:false,photo:"assets/products/charger-20w.png"},
+  {id:"magsafe",cat:"acc",model:"MagSafe Charger",variant:"",color:"Беспроводная",price:4990,old:0,stock:true,hit:false,photo:"assets/products/magsafe.png"},
+  {id:"case-16pro",cat:"acc",model:"Чехол iPhone 16 Pro",variant:"",color:"Silicone Black",price:3490,old:0,stock:true,hit:false,photo:"assets/products/case-16pro.png"},
 ];
 
 /* ======================= ОКРУЖЕНИЕ ======================= */
@@ -331,7 +394,6 @@ const photoOf = p => p.photo ? p.photo : (PHOTO_BASE + p.id + ".svg");
 
 function haptic(t){ try{ tg && tg.HapticFeedback && tg.HapticFeedback.impactOccurred(t||'light'); }catch(e){} }
 function notify(t){ try{ tg && tg.HapticFeedback && tg.HapticFeedback.notificationOccurred(t||'success'); }catch(e){} }
-function lucide(){ try{ window.lucide && window.lucide.createIcons(); }catch(e){} }
 
 /* ======================= КОРЗИНА / ИЗБРАННОЕ ======================= */
 function cartCount(){ return Object.values(State.cart).reduce((a,b)=>a+b,0); }
@@ -370,13 +432,13 @@ function syncBack(){
 function card(p){
   const fav=State.fav.has(p.id)?'on':'';
   let badge='';
-  if(p.hit) badge=`<div class="badge hit"><i data-lucide="flame"></i>Хит</div>`;
+  if(p.hit) badge=`<div class="badge hit">${ic('flame')}Хит</div>`;
   else if(p.old) badge=`<div class="badge sale">-${Math.round((1-p.price/p.old)*100)}%</div>`;
   else if(!p.stock) badge=`<div class="badge order">Под заказ</div>`;
   const old=p.old?`<span class="old">${money(p.old)}</span>`:'';
   return `<div class="card" onclick="App.go('product',{productId:'${p.id}'})">
     ${badge}
-    <div class="fav ${fav}" onclick="event.stopPropagation();toggleFav('${p.id}');render()"><i data-lucide="heart"></i></div>
+    <div class="fav ${fav}" onclick="event.stopPropagation();toggleFav('${p.id}');render()">${ic('heart')}</div>
     <div class="ph"><img src="${photoOf(p)}" alt="${p.model}" loading="lazy"></div>
     <div class="info">
       <div class="m">${p.model}</div>
@@ -392,21 +454,21 @@ function viewHome(){
   const popular=PRODUCTS.filter(p=>['ip16p-256','mbp14-512','s24u-256','aw10-46','ipad-pro-256','airpods-pro2'].includes(p.id));
   return `<div class="view">
     <div class="hero">
-      <div class="logo-frame"><i data-lucide="smartphone"></i></div>
+      <div class="logo-frame">${ic('smartphone')}</div>
       <h1>OgrStore</h1>
       <p>Оригинальная техника Apple, Samsung и консоли</p>
       <div class="trust-line">
-        <span><i data-lucide="badge-check"></i> Только оригинал</span>
-        <span><i data-lucide="shield-check"></i> Гарантия</span>
-        <span><i data-lucide="truck"></i> Доставка по РФ</span>
+        <span>${ic('badge-check')} Только оригинал</span>
+        <span>${ic('shield-check')} Гарантия</span>
+        <span>${ic('truck')} Доставка по РФ</span>
       </div>
     </div>
-    <div class="sec-head"><h2>Хиты со скидкой</h2><span class="link" onclick="App.go('cat',{cat:'iphone'})">Каталог <i data-lucide="chevron-right"></i></span></div>
+    <div class="sec-head"><h2>Хиты со скидкой</h2><span class="link" onclick="App.go('cat',{cat:'iphone'})">Каталог ${ic('chevron-right')}</span></div>
     <div class="row-scroll stagger">${hits.map(card).join('')}</div>
     <div class="sec-head"><h2>Категории</h2></div>
     <div class="cats stagger">
       ${CATEGORIES.map(c=>`<div class="cat-tile" onclick="App.go('cat',{cat:'${c.key}'})">
-        <div class="ic"><i data-lucide="${c.icon}"></i></div>
+        <div class="ic">${ic('${c.icon}')}</div>
         <div><div class="t">${c.title}</div><div class="c">${c.sub}</div></div>
       </div>`).join('')}
     </div>
@@ -451,15 +513,15 @@ function viewProduct(){
     <div class="stock ${p.stock?'in':'out'}"><span class="dot"></span>${p.stock?'В наличии · отправим сегодня':'Под заказ · 7–14 дней'}</div>
     ${opts}
     <div class="trust-row">
-      <div class="t"><i data-lucide="badge-check"></i><b>Оригинал</b><span>проверка при вас</span></div>
-      <div class="t"><i data-lucide="shield-check"></i><b>Гарантия</b><span>на устройство</span></div>
-      <div class="t"><i data-lucide="truck"></i><b>Доставка</b><span>по РФ</span></div>
+      <div class="t">${ic('badge-check')}<b>Оригинал</b><span>проверка при вас</span></div>
+      <div class="t">${ic('shield-check')}<b>Гарантия</b><span>на устройство</span></div>
+      <div class="t">${ic('truck')}<b>Доставка</b><span>по РФ</span></div>
     </div>
     <div class="opt-label">С этим берут</div>
     <div class="row-scroll">${cross.map(card).join('')}</div>
     <div class="sticky-cta">
-      <button class="btn btn-gold" onclick="addToCart('${p.id}');render()"><i data-lucide="shopping-bag"></i> ${inCart?('В корзине · '+inCart):'В корзину'}</button>
-      <div class="icon-btn ${fav}" onclick="toggleFav('${p.id}');render()"><i data-lucide="heart"></i></div>
+      <button class="btn btn-gold" onclick="addToCart('${p.id}');render()">${ic('shopping-bag')} ${inCart?('В корзине · '+inCart):'В корзину'}</button>
+      <div class="icon-btn ${fav}" onclick="toggleFav('${p.id}');render()">${ic('heart')}</div>
     </div>
   </div>`;
 }
@@ -476,7 +538,7 @@ function viewCart(){
     </div>
     <div class="ci-right">
       <div class="qty"><button onclick="setQty('${id}',-1)">–</button><span>${q}</span><button onclick="setQty('${id}',1)">+</button></div>
-      <div class="del" onclick="removeItem('${id}')"><i data-lucide="trash-2"></i>удалить</div>
+      <div class="del" onclick="removeItem('${id}')">${ic('trash-2')}удалить</div>
     </div>
   </div>`;}).join('');
   return `<div class="view">
@@ -487,7 +549,7 @@ function viewCart(){
       <div class="row"><span>Доставка</span><span style="color:var(--ok)">бесплатно</span></div>
       <div class="row total"><span>Итого</span><b>${money(cartTotal())}</b></div>
     </div>
-    <div class="sticky-cta"><button class="btn btn-gold" onclick="App.go('checkout')"><i data-lucide="arrow-right"></i> Оформить заказ</button></div>
+    <div class="sticky-cta"><button class="btn btn-gold" onclick="App.go('checkout')">${ic('arrow-right')} Оформить заказ</button></div>
   </div>`;
 }
 
@@ -507,7 +569,7 @@ function viewCheckout(){
     <div class="summary"><div class="row total"><span>К оплате</span><b>${money(cartTotal())}</b></div></div>
     <p style="color:var(--muted);font-size:12px;line-height:1.5;margin:14px 2px 0">
       Менеджер свяжется с вами для подтверждения. Оплата — после проверки товара.</p>
-    <div class="sticky-cta"><button class="btn btn-gold" onclick="submitOrder()"><i data-lucide="check"></i> Подтвердить заказ</button></div>
+    <div class="sticky-cta"><button class="btn btn-gold" onclick="submitOrder()">${ic('check')} Подтвердить заказ</button></div>
   </div>`;
 }
 function submitOrder(){
@@ -525,7 +587,7 @@ function submitOrder(){
 
 function viewSuccess(){
   return `<div class="view success">
-    <div class="seal"><i data-lucide="check"></i></div>
+    <div class="seal">${ic('check')}</div>
     <h2 class="serif">Заявка принята</h2>
     <div class="order-no">№ ${State._orderNo||'OGR-000000'}</div>
     <p>Менеджер <b style="color:var(--gold-2)">@iPhone2Metra</b> свяжется с вами в ближайшее время для подтверждения и доставки.</p>
@@ -535,7 +597,7 @@ function viewSuccess(){
 
 function viewSearch(){
   return `<div class="view">
-    <div class="search-wrap"><span class="si"><i data-lucide="search"></i></span>
+    <div class="search-wrap"><span class="si">${ic('search')}</span>
       <input id="in-search" placeholder="Поиск: iPhone 16 Pro, MacBook…" value="${State.query.replace(/"/g,'&quot;')}"
         oninput="State.query=this.value;renderSearchResults()">
     </div>
@@ -544,14 +606,14 @@ function viewSearch(){
 }
 function searchBody(){
   const q=State.query.trim().toLowerCase();
-  if(!q) return `<div class="empty"><i data-lucide="search"></i><p>Введите модель: iPhone 16 Pro, MacBook, 256…</p></div>`;
+  if(!q) return `<div class="empty">${ic('search')}<p>Введите модель: iPhone 16 Pro, MacBook, 256…</p></div>`;
   const res=PRODUCTS.filter(p=>(p.model+' '+p.variant+' '+p.color).toLowerCase().includes(q));
-  if(!res.length) return `<div class="empty"><i data-lucide="search-x"></i><p>Ничего не нашлось по «${State.query}»</p></div>`;
+  if(!res.length) return `<div class="empty">${ic('search-x')}<p>Ничего не нашлось по «${State.query}»</p></div>`;
   return `<div class="grid">${res.map(card).join('')}</div>`;
 }
 function renderSearchResults(){
   const el=document.getElementById('search-body'); if(!el) return;
-  el.innerHTML=searchBody(); lucide();
+  el.innerHTML=searchBody();
 }
 
 function viewFav(){
@@ -565,24 +627,24 @@ function viewAbout(){
   return `<div class="view">
     <div class="sec-head"><h2>Гарантии и безопасность</h2></div>
     <div class="about-card">
-      <div class="about-item"><i data-lucide="badge-check"></i><div><b>Только оригинал.</b> Вся техника новая, запечатанная. Проверяем вместе с вами перед оплатой.</div></div>
-      <div class="about-item"><i data-lucide="shield-check"></i><div><b>Официальная гарантия</b> на каждое устройство.</div></div>
-      <div class="about-item"><i data-lucide="eye"></i><div><b>Сначала проверка — потом оплата.</b> Вы платите, только когда убедились, что всё в порядке.</div></div>
-      <div class="about-item"><i data-lucide="truck"></i><div><b>Доставка</b> курьером по Москве и СДЭК / Почтой по России.</div></div>
+      <div class="about-item">${ic('badge-check')}<div><b>Только оригинал.</b> Вся техника новая, запечатанная. Проверяем вместе с вами перед оплатой.</div></div>
+      <div class="about-item">${ic('shield-check')}<div><b>Официальная гарантия</b> на каждое устройство.</div></div>
+      <div class="about-item">${ic('eye')}<div><b>Сначала проверка — потом оплата.</b> Вы платите, только когда убедились, что всё в порядке.</div></div>
+      <div class="about-item">${ic('truck')}<div><b>Доставка</b> курьером по Москве и СДЭК / Почтой по России.</div></div>
     </div>
     <div class="about-card warn">
       <h3>⚠️ Берегитесь мошенников</h3>
       <p style="color:var(--muted);font-size:13px;line-height:1.55;margin:0 0 12px">От нашего имени пишут из фейковых аккаунтов. Запомните официальные контакты:</p>
-      <div class="about-item"><i data-lucide="check"></i><div>Бот: <b>@OgrStoreBot</b></div></div>
-      <div class="about-item"><i data-lucide="check"></i><div>Канал: <b>@ogrstore</b></div></div>
-      <div class="about-item"><i data-lucide="check"></i><div>Менеджер: <b>@iPhone2Metra</b></div></div>
+      <div class="about-item">${ic('check')}<div>Бот: <b>@OgrStoreBot</b></div></div>
+      <div class="about-item">${ic('check')}<div>Канал: <b>@ogrstore</b></div></div>
+      <div class="about-item">${ic('check')}<div>Менеджер: <b>@iPhone2Metra</b></div></div>
       <p style="color:var(--muted);font-size:12.5px;margin:8px 0 0">Первыми мы нигде больше не пишем.</p>
     </div>
   </div>`;
 }
 
-function emptyView(ic,title,sub,btn,action){
-  return `<div class="view"><div class="empty"><i data-lucide="${ic}"></i>
+function emptyView(ic_name,title,sub,btn,action){
+  return `<div class="view"><div class="empty">${ic('${ic}')}
     <h2>${title}</h2><p>${sub}</p>
     <button class="btn btn-ghost" style="max-width:240px;margin:0 auto" onclick="${action}">${btn}</button>
   </div></div>`;
@@ -593,7 +655,6 @@ function render(){
   const map={home:viewHome,cat:viewCat,product:viewProduct,cart:viewCart,checkout:viewCheckout,success:viewSuccess,search:viewSearch,fav:viewFav,about:viewAbout};
   document.getElementById('screen').innerHTML=(map[State.view]||viewHome)();
   renderTabbar();
-  lucide();
 }
 function renderTabbar(){
   const tabs=[
@@ -608,12 +669,25 @@ function renderTabbar(){
   const cc=cartCount();
   document.getElementById('tabbar').innerHTML=tabs.map(t=>{
     const badge=(t.v==='cart'&&cc)?`<span class="cart-badge">${cc}</span>`:'';
-    return `<div class="tab ${isActive(t.v)?'on':''}" onclick="App.tab('${t.v}')"><i data-lucide="${t.ic}"></i>${badge}<span>${t.label}</span></div>`;
+    return `<div class="tab ${isActive(t.v)?'on':''}" onclick="App.tab('${t.v}')">${ic('${t.ic}')}${badge}<span>${t.label}</span></div>`;
   }).join('');
 }
 
 /* ======================= СТАРТ ======================= */
 function boot(){
+  // логотип в шапке — слот под брендинг (logo.png или иконка)
+  const mark = document.getElementById('brand-mark');
+  if(mark){
+    // ── ВСТАВЬТЕ СВОЙ ЛОГОТИП ──────────────────────────────
+    // Вариант A: PNG-логотип (рекомендуется)
+    //   mark.innerHTML = '<img src="assets/logo.png" style="width:22px;height:auto;object-fit:contain">';
+    // Вариант B: иконка (текущий фолбэк)
+    mark.innerHTML = ic('smartphone');
+    // ───────────────────────────────────────────────────────
+  }
+  const shield = document.getElementById('topbar-shield');
+  if(shield) shield.insertAdjacentHTML('afterbegin', ic('shield-check'));
+
   if(tg){
     try{
       tg.ready(); tg.expand();
